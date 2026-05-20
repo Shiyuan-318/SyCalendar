@@ -4,536 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SyCalendar</title>
-    <style>
-        @font-face {
-            font-family: 'HarmonyOS Sans SC';
-            src: url('HarmonyOS_Sans_SC_Medium.ttf') format('truetype');
-            font-weight: 500;
-            font-display: swap;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            min-height: 100vh;
-            background: url('Picture.jpg') center/cover no-repeat fixed;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding-right: 10%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(2px);
-            z-index: 0;
-        }
-
-        .calendar-wrapper {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* 大日期显示 */
-        .big-date-display {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .big-day {
-            font-size: 180px;
-            font-weight: 300;
-            line-height: 1;
-            letter-spacing: -10px;
-            margin-bottom: 10px;
-        }
-
-        .big-date-info {
-            font-size: 16px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            opacity: 0.9;
-        }
-
-        /* 日历卡片 - 玻璃拟态效果 */
-        .calendar-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            padding: 24px;
-            width: 380px;
-        }
-
-        /* 日历头部 */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .nav-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .month-year {
-            font-size: 18px;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        .today-btn {
-            padding: 6px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: transparent;
-            border-radius: 16px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .today-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* 星期标题 */
-        .weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            margin-bottom: 12px;
-        }
-
-        .weekday {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.6);
-            padding: 8px 0;
-        }
-
-        .weekday:first-child,
-        .weekday:last-child {
-            color: rgba(255, 150, 150, 0.8);
-        }
-
-        /* 日期网格 */
-        .days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            font-weight: 400;
-            padding: 4px;
-        }
-
-        .day:hover:not(.empty):not(.today):not(.selected) {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .day.empty {
-            cursor: default;
-        }
-
-        .day.other-month {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .day.weekend {
-            color: rgba(255, 180, 180, 0.9);
-        }
-
-        .day.weekend.other-month {
-            color: rgba(255, 150, 150, 0.4);
-        }
-
-        .day-number {
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1;
-        }
-
-        .day-lunar {
-            font-size: 9px;
-            opacity: 0.6;
-            margin-top: 2px;
-            transform: scale(0.9);
-        }
-
-        /* 今天 */
-        .day.today {
-            background: rgba(255, 255, 255, 0.25);
-            font-weight: 500;
-        }
-
-        .day.today .day-number {
-            font-weight: 500;
-        }
-
-        /* 选中 */
-        .day.selected {
-            background: rgba(255, 255, 255, 0.35);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .day.selected .day-number {
-            font-weight: 500;
-        }
-
-        /* 事件指示器 */
-        .day.has-event::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 200, 100, 0.9);
-            border-radius: 50%;
-        }
-
-        /* 底部信息 */
-        .calendar-footer {
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .selected-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-        }
-
-        .selected-label {
-            padding: 4px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .selected-date-text {
-            font-weight: 500;
-        }
-
-        /* 动画 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .day.animate-in {
-            animation: fadeInUp 0.3s ease forwards;
-        }
-
-        .calendar-card {
-            animation: fadeInUp 0.5s ease forwards;
-        }
-
-        .big-date-display {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        /* 移动端适配 */
-        @media (max-width: 500px) {
-            .big-day {
-                font-size: 120px;
-                letter-spacing: -6px;
-            }
-
-            .big-date-info {
-                font-size: 14px;
-            }
-
-            .calendar-card {
-                width: calc(100vw - 40px);
-                padding: 20px;
-                border-radius: 20px;
-            }
-
-            .day {
-                font-size: 13px;
-                border-radius: 10px;
-            }
-
-            .day-number {
-                font-size: 14px;
-            }
-
-            .day-lunar {
-                font-size: 8px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="calendar-wrapper">
-        <!-- 大日期显示 -->
-        <div class="big-date-display">
-            <div class="big-day" id="bigDay">8</div>
-            <div class="big-date-info" id="bigDateInfo">丙午年 | 正月二十 星期日</div>
+    <!-- Mobile Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="菜单">☰</button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">📅 SyCalendar</div>
+            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</button>
         </div>
 
-        <!-- 日历卡片 -->
-        <div class="calendar-card">
-            <div class="calendar-header">
-                <div class="month-nav">
-                    <button class="nav-btn" id="prevMonth">‹</button>
-                    <span class="month-year" id="monthYear">3月</span>
-                    <button class="nav-btn" id="nextMonth">›</button>
-                </div>
-                <button class="today-btn" id="todayBtn">今天</button>
+        <div class="view-switcher">
+            <div class="view-switcher-label">视图</div>
+            <button class="view-btn active" data-view="month">
+                <span class="view-btn-icon">📆</span>
+                <span class="view-btn-text">月视图</span>
+            </button>
+            <button class="view-btn" data-view="week">
+                <span class="view-btn-icon">📋</span>
+                <span class="view-btn-text">周视图</span>
+            </button>
+            <button class="view-btn" data-view="day">
+                <span class="view-btn-icon">☀️</span>
+                <span class="view-btn-text">日视图</span>
+            </button>
+            <button class="view-btn" data-view="year">
+                <span class="view-btn-icon">🗓️</span>
+                <span class="view-btn-text">年视图</span>
+            </button>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-header">
+                <span class="sidebar-section-title">今日日程</span>
+                <button class="sidebar-add-btn" id="sidebarAddEvent" title="添加日程">+</button>
             </div>
-
-            <div class="weekdays">
-                <div class="weekday">日</div>
-                <div class="weekday">一</div>
-                <div class="weekday">二</div>
-                <div class="weekday">三</div>
-                <div class="weekday">四</div>
-                <div class="weekday">五</div>
-                <div class="weekday">六</div>
+            <div class="sidebar-events-list" id="sidebarEventsList">
+                <div class="sidebar-empty">暂无日程</div>
             </div>
+        </div>
 
-            <div class="days" id="days"></div>
+        <div class="sidebar-section" style="margin-top: auto;">
+            <button class="btn btn-export" id="exportBtn" style="width:100%">
+                📥 导出日程 (ICS)
+            </button>
+        </div>
+    </aside>
 
-            <div class="calendar-footer">
-                <div class="selected-info">
-                    <span class="selected-label">已选择</span>
-                    <span class="selected-date-text" id="selectedDateText">3月8日 星期六</span>
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="big-date-display" id="bigDateDisplay">
+            <div class="big-day" id="bigDay">8</div>
+            <div class="big-date-info" id="bigDateInfo"></div>
+            <div class="big-date-lunar" id="bigDateLunar"></div>
+        </div>
+
+        <div class="calendar-card" id="calendarCard"></div>
+    </main>
+
+    <!-- Event Modal -->
+    <div class="modal-overlay" id="modalOverlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-title" id="modalTitle">添加日程</div>
+            <div class="form-group">
+                <label class="form-label">日程标题</label>
+                <input type="text" class="form-input" id="eventTitle" placeholder="输入日程标题">
+            </div>
+            <div class="form-group">
+                <label class="form-label">日期</label>
+                <input type="date" class="form-input" id="eventDate">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">开始时间</label>
+                    <input type="time" class="form-input" id="eventStartTime" value="09:00">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">结束时间</label>
+                    <input type="time" class="form-input" id="eventEndTime" value="10:00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">提醒时间</label>
+                <select class="form-input" id="eventReminder">
+                    <option value="0">不提醒</option>
+                    <option value="5">提前 5 分钟</option>
+                    <option value="15">提前 15 分钟</option>
+                    <option value="30">提前 30 分钟</option>
+                    <option value="60">提前 1 小时</option>
+                    <option value="1440">提前 1 天</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">备注</label>
+                <textarea class="form-input" id="eventNotes" placeholder="添加备注信息..."></textarea>
+            </div>
+            <input type="hidden" id="eventId">
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="modalCancel">取消</button>
+                <button class="btn btn-danger" id="modalDelete" style="display:none;">删除</button>
+                <button class="btn btn-primary" id="modalSave">保存</button>
             </div>
         </div>
     </div>
 
-    <script>
-        const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
-                           '七月', '八月', '九月', '十月', '十一月', '十二月'];
-        const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-        const lunarMonths = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
-        const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-                          '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-                          '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
-        let currentDate = new Date();
-        let selectedDate = new Date();
-        let isAnimating = false;
-
-        // 获取农历日期（简化版）
-        function getLunarInfo(date) {
-            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            const lunarMonth = lunarMonths[(dayOfYear % 12)];
-            const lunarDay = lunarDays[(dayOfYear % 30)];
-            return { month: lunarMonth, day: lunarDay };
-        }
-
-        // 更新大日期显示
-        function updateBigDateDisplay() {
-            const day = selectedDate.getDate();
-            const year = selectedDate.getFullYear();
-            const month = selectedDate.getMonth() + 1;
-            const weekDay = weekDays[selectedDate.getDay()];
-            const lunar = getLunarInfo(selectedDate);
-
-            // 计算干支年（简化）
-            const ganZhiYear = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-            const zhiZhiYear = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-            const yearOffset = (year - 4) % 60;
-            const gan = ganZhiYear[yearOffset % 10];
-            const zhi = zhiZhiYear[yearOffset % 12];
-
-            document.getElementById('bigDay').textContent = day;
-            document.getElementById('bigDateInfo').textContent =
-                `${gan}${zhi}年 | ${lunar.month}月${lunar.day} ${weekDay}`;
-        }
-
-        // 渲染日历
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            document.getElementById('monthYear').textContent = `${month + 1}月`;
-
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startingDay = firstDay.getDay();
-            const totalDays = lastDay.getDate();
-            const prevMonthLastDay = new Date(year, month, 0).getDate();
-
-            const daysContainer = document.getElementById('days');
-            daysContainer.innerHTML = '';
-
-            const today = new Date();
-            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
-
-            let delay = 0;
-
-            // 上月日期
-            for (let i = startingDay - 1; i >= 0; i--) {
-                const dayEl = createDayElement(prevMonthLastDay - i, true, false, false, delay);
-                daysContainer.appendChild(dayEl);
-                delay++;
-            }
-
-            // 当月日期
-            for (let day = 1; day <= totalDays; day++) {
-                const dayOfWeek = new Date(year, month, day).getDay();
-                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                const isToday = isCurrentMonth && day === today.getDate();
-                const isSelected = selectedDate.getFullYear() === year &&
-                                  selectedDate.getMonth() === month &&
-                                  selectedDate.getDate() === day;
-
-                const dayEl = createDayElement(day, false, isWeekend, isToday, delay, isSelected, year, month);
-                daysContainer.appendChild(dayEl);
-                delay++;
-            }
-
-            // 下月日期
-            const remainingDays = 42 - (startingDay + totalDays);
-            for (let i = 1; i <= remainingDays; i++) {
-                const dayEl = createDayElement(i, true, false, false, delay);
-                daysContainer.appendChild(dayEl);
-                delay++;
-            }
-
-            updateSelectedDisplay();
-            updateBigDateDisplay();
-        }
-
-        function createDayElement(dayNum, isOtherMonth, isWeekend, isToday, delay, isSelected = false, year = null, month = null) {
-            const dayEl = document.createElement('div');
-            dayEl.className = 'day animate-in';
-            dayEl.style.animationDelay = `${delay * 0.01}s`;
-
-            if (isOtherMonth) dayEl.classList.add('other-month');
-            if (isWeekend) dayEl.classList.add('weekend');
-            if (isToday) dayEl.classList.add('today');
-            if (isSelected) dayEl.classList.add('selected');
-
-            // 显示农历
-            let lunarText = '';
-            if (!isOtherMonth && year !== null) {
-                const date = new Date(year, month, dayNum);
-                const lunar = getLunarInfo(date);
-                // 初一显示月份，其他显示日期
-                if (lunar.day === '初一') {
-                    lunarText = lunar.month + '月';
-                } else {
-                    lunarText = lunar.day;
-                }
-                // 特殊节日（简化）
-                if (month === 2 && dayNum === 8) lunarText = '妇女节';
-            }
-
-            dayEl.innerHTML = `
-                <span class="day-number">${dayNum}</span>
-                ${lunarText ? `<span class="day-lunar">${lunarText}</span>` : ''}
-            `;
-
-            if (!isOtherMonth && year !== null) {
-                dayEl.addEventListener('click', () => {
-                    selectedDate = new Date(year, month, dayNum);
-                    renderCalendar();
-                });
-            }
-
-            return dayEl;
-        }
-
-        function updateSelectedDisplay() {
-            const month = selectedDate.getMonth() + 1;
-            const day = selectedDate.getDate();
-            const weekDay = weekDays[selectedDate.getDay()];
-            document.getElementById('selectedDateText').textContent = `${month}月${day}日 ${weekDay}`;
-        }
-
-        // 事件监听
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        document.getElementById('todayBtn').addEventListener('click', () => {
-            currentDate = new Date();
-            selectedDate = new Date();
-            renderCalendar();
-        });
-
-        // 初始化
-        renderCalendar();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
